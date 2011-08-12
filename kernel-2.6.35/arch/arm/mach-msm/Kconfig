@@ -477,6 +477,15 @@ config MACH_MSM8X60_QT
 	help
 	  Support for the Qualcomm MSM8x60 QT board.
 
+config MACH_ES209RA
+	depends on ARCH_QSD8X50
+	depends on MSM_SOC_REV_NONE
+	depends on MSM_STACKED_MEMORY
+	default y
+	bool "QSD8x50 ES209RA (Rachael)"
+	help
+	  Support for the ES209RA (Rachael) SEMC product using QSD8x50.
+
 endmenu
 
 config MSM_STACKED_MEMORY
