@@ -9,6 +9,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
+ *
  */
 
 #include <linux/kernel.h>
@@ -56,6 +61,7 @@
 #include "msm-keypad-devices.h"
 #include "pm.h"
 #include "proc_comm.h"
+#include <linux/msm_kgsl.h>
 #ifdef CONFIG_USB_ANDROID
 #include <linux/usb/android_composite.h>
 #endif
@@ -380,10 +386,10 @@ static struct msm_hsusb_platform_data msm_hsusb_pdata = {
 #ifdef CONFIG_USB_FUNCTION
 	.version	= 0x0100,
 	.phy_info	= (USB_PHY_INTEGRATED | USB_PHY_MODEL_180NM),
-	.vendor_id          = 0x0FCE,
-	.product_name       = "Sony Ericsson X10",
+	.vendor_id          = 0x5c6,
+	.product_name       = "Qualcomm HSUSB Device",
 	.serial_number      = "1234567890ABCDEF",
-	.manufacturer_name  = "Sony Ericsson, Inc.",
+	.manufacturer_name  = "Qualcomm Incorporated",
 	.compositions	= usb_func_composition,
 	.num_compositions = ARRAY_SIZE(usb_func_composition),
 	.function_map   = usb_functions_map,
@@ -469,6 +475,7 @@ static struct android_pmem_platform_data android_pmem_adsp_pdata = {
 
 static struct android_pmem_platform_data android_pmem_smipool_pdata = {
 	.name = "pmem_smipool",
+	.start = MSM_PMEM_SMIPOOL_BASE,
 	.size = MSM_PMEM_SMIPOOL_SIZE,
 	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
 	.cached = 0,
@@ -518,12 +525,12 @@ static int msm_fb_detect_panel(const char *name)
 {
 	int ret = -EPERM;
 
-	if (machine_is_qsd8x50_ffa()) {
+	if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
 		if (!strncmp(name, "mddi_toshiba_wvga_pt", 20))
 			ret = 0;
 		else
 			ret = -ENODEV;
-	} else if ((machine_is_qsd8x50_surf())
+	} else if ((machine_is_qsd8x50_surf() || machine_is_qsd8x50a_surf())
 			&& !strcmp(name, "lcdc_external"))
 		ret = 0;
 
@@ -711,7 +718,7 @@ static int mddi_toshiba_pmic_bl(int level)
 {
 	int ret = -EPERM;
 
-	if (machine_is_qsd8x50_ffa()) {
+	if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
 		ret = pmic_set_led_intensity(LED_LCD, level);
 
 		if (ret)
@@ -767,7 +774,8 @@ static int msm_fb_mddi_power_save(int on)
 
 	mddi_power_save_on = flag_on;
 
-	if (!flag_on && machine_is_qsd8x50_ffa()) {
+	if (!flag_on && (machine_is_qsd8x50_ffa()
+				|| machine_is_qsd8x50a_ffa())) {
 		gpio_set_value(MDDI_RST_OUT_GPIO, 0);
 		mdelay(1);
 	}
@@ -780,7 +788,8 @@ static int msm_fb_mddi_power_save(int on)
 	msm_fb_vreg_config("gp5", flag_on);
 	msm_fb_vreg_config("boost", flag_on);
 
-	if (flag_on && machine_is_qsd8x50_ffa()) {
+	if (flag_on && (machine_is_qsd8x50_ffa()
+			|| machine_is_qsd8x50a_ffa())) {
 		gpio_set_value(MDDI_RST_OUT_GPIO, 0);
 		mdelay(1);
 		gpio_set_value(MDDI_RST_OUT_GPIO, 1);
@@ -1075,7 +1084,7 @@ static int bluetooth_power(int on)
 			return rc;
 		}
 
-		if (machine_is_qsd8x50_ffa()) {
+		if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
 			rc = msm_gpios_enable
 					(wlan_config_power_on,
 					 ARRAY_SIZE(wlan_config_power_on));
@@ -1091,12 +1100,12 @@ static int bluetooth_power(int on)
 		gpio_set_value(22, on); /* VDD_IO */
 		gpio_set_value(18, on); /* SYSRST */
 
-		if (machine_is_qsd8x50_ffa()) {
+		if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
 			gpio_set_value(138, 0); /* WLAN: CHIP_PWD */
 			gpio_set_value(113, on); /* WLAN */
 		}
 	} else {
-		if (machine_is_qsd8x50_ffa()) {
+		if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
 			gpio_set_value(138, on); /* WLAN: CHIP_PWD */
 			gpio_set_value(113, on); /* WLAN */
 		}
@@ -1120,7 +1129,7 @@ static int bluetooth_power(int on)
 			return rc;
 		}
 
-		if (machine_is_qsd8x50_ffa()) {
+		if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
 			rc = msm_gpios_enable
 					(wlan_config_power_off,
 					 ARRAY_SIZE(wlan_config_power_off));
@@ -1144,7 +1153,7 @@ static void __init bt_power_init(void)
 	struct vreg *vreg_bt;
 	int rc;
 
-	if (machine_is_qsd8x50_ffa()) {
+	if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
 		gpio_set_value(138, 0); /* WLAN: CHIP_PWD */
 		gpio_set_value(113, 0); /* WLAN */
 	}
@@ -1189,6 +1198,54 @@ exit:
 #else
 #define bt_power_init(x) do {} while (0)
 #endif
+
+static struct resource kgsl_3d0_resources[] = {
+       {
+		.name  = KGSL_3D0_REG_MEMORY,
+		.start = 0xA0000000,
+		.end = 0xA001ffff,
+		.flags = IORESOURCE_MEM,
+       },
+       {
+		.name = KGSL_3D0_IRQ,
+		.start = INT_GRAPHICS,
+		.end = INT_GRAPHICS,
+		.flags = IORESOURCE_IRQ,
+       },
+};
+
+static struct kgsl_device_platform_data kgsl_3d0_pdata = {
+	.pwr_data = {
+		.pwrlevel = {
+			{
+				.gpu_freq = 0,
+				.bus_freq = 128000000,
+			},
+		},
+		.init_level = 0,
+		.num_levels = 1,
+		.set_grp_async = NULL,
+		.idle_timeout = HZ/5,
+	},
+	.clk = {
+		.name = {
+			.clk = "grp_clk",
+		},
+	},
+	.imem_clk_name = {
+		.clk = "imem_clk",
+	},
+};
+
+static struct platform_device msm_kgsl_3d0 = {
+       .name = "kgsl-3d0",
+       .id = 0,
+       .num_resources = ARRAY_SIZE(kgsl_3d0_resources),
+       .resource = kgsl_3d0_resources,
+	.dev = {
+		.platform_data = &kgsl_3d0_pdata,
+	},
+};
 
 static struct platform_device msm_device_pmic_leds = {
 	.name	= "pmic-leds",
@@ -1554,7 +1611,7 @@ static int config_camera_on_gpios(void)
 {
 	int vreg_en = 1;
 
-	if (machine_is_qsd8x50_ffa()) {
+	if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
 		config_gpio_table(camera_on_gpio_ffa_table,
 		ARRAY_SIZE(camera_on_gpio_ffa_table));
 
@@ -1570,7 +1627,7 @@ static void config_camera_off_gpios(void)
 {
 	int vreg_en = 0;
 
-	if (machine_is_qsd8x50_ffa()) {
+	if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
 		config_gpio_table(camera_off_gpio_ffa_table,
 		ARRAY_SIZE(camera_off_gpio_ffa_table));
 
@@ -2007,7 +2064,7 @@ static void __init qsd8x50_init_usb(void)
 	platform_device_register(&msm_device_gadget_peripheral);
 #endif
 
-	if (machine_is_qsd8x50_ffa())
+	if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa())
 		return;
 
 	vreg_usb = vreg_get(NULL, "boost");
@@ -2170,7 +2227,7 @@ static int msm_sdcc_get_wpswitch(struct device *dv)
 	uint32_t ret = 0;
 	struct platform_device *pdev;
 
-	if (!machine_is_qsd8x50_surf())
+	if (!(machine_is_qsd8x50_surf() || machine_is_qsd8x50a_surf()))
 		return -1;
 
 	pdev = container_of(dv, struct platform_device, dev);
@@ -2259,7 +2316,7 @@ static struct mmc_platform_data qsd8x50_sdc4_data = {
 
 static void __init qsd8x50_init_mmc(void)
 {
-	if (machine_is_qsd8x50_ffa())
+	if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa())
 		vreg_mmc = vreg_get(NULL, "gp6");
 	else
 		vreg_mmc = vreg_get(NULL, "gp5");
@@ -2274,7 +2331,7 @@ static void __init qsd8x50_init_mmc(void)
 	msm_add_sdcc(1, &qsd8x50_sdc1_data);
 #endif
 
-	if (machine_is_qsd8x50_surf()) {
+	if (machine_is_qsd8x50_surf() || machine_is_qsd8x50a_surf()) {
 #ifdef CONFIG_MMC_MSM_SDC2_SUPPORT
 		msm_add_sdcc(2, &qsd8x50_sdc2_data);
 #endif
@@ -2292,12 +2349,12 @@ static void __init qsd8x50_cfg_smc91x(void)
 {
 	int rc = 0;
 
-	if (machine_is_qsd8x50_surf()) {
+	if (machine_is_qsd8x50_surf() || machine_is_qsd8x50a_surf()) {
 		smc91x_resources[0].start = 0x70000300;
 		smc91x_resources[0].end = 0x700003ff;
 		smc91x_resources[1].start = MSM_GPIO_TO_INT(156);
 		smc91x_resources[1].end = MSM_GPIO_TO_INT(156);
-	} else if (machine_is_qsd8x50_ffa()) {
+	} else if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
 		smc91x_resources[0].start = 0x84000300;
 		smc91x_resources[0].end = 0x840003ff;
 		smc91x_resources[1].start = MSM_GPIO_TO_INT(87);
@@ -2315,41 +2372,30 @@ static void __init qsd8x50_cfg_smc91x(void)
 }
 
 static struct msm_pm_platform_data msm_pm_data[MSM_PM_SLEEP_MODE_NR] = {
-	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE] = {
-		.idle_supported = 1,
-		.suspend_supported = 1,
-		.idle_enabled = 1,
-		.suspend_enabled = 1,
-		.latency = 8594,
-		.residency = 23740,
-	},
+	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE].supported = 1,
+	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE].suspend_enabled = 1,
+	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE].idle_enabled = 1,
+	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE].latency = 8594,
+	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE].residency = 23740,
 
-	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE_NO_XO_SHUTDOWN] = {
-		.idle_supported = 1,
-		.suspend_supported = 1,
-		.idle_enabled = 1,
-		.suspend_enabled = 1,
-		.latency = 4594,
-		.residency = 23740,
-	},
+	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE_NO_XO_SHUTDOWN].supported = 1,
+	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE_NO_XO_SHUTDOWN].suspend_enabled = 1,
+	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE_NO_XO_SHUTDOWN].idle_enabled = 1,
+	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE_NO_XO_SHUTDOWN].latency = 4594,
+	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE_NO_XO_SHUTDOWN].residency = 23740,
 
-	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT] = {
-		.idle_supported = 1,
-		.suspend_supported = 1,
-		.idle_enabled = 0,
-		.suspend_enabled = 1,
-		.latency = 443,
-		.residency = 1098,
-	},
+	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].supported = 1,
+	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].suspend_enabled
+		= 1,
+	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].idle_enabled = 0,
+	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].latency = 443,
+	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].residency = 1098,
 
-	[MSM_PM_SLEEP_MODE_WAIT_FOR_INTERRUPT] = {
-		.idle_supported = 1,
-		.suspend_supported = 1,
-		.idle_enabled = 1,
-		.suspend_enabled = 1,
-		.latency = 2,
-		.residency = 0,
-	},
+	[MSM_PM_SLEEP_MODE_WAIT_FOR_INTERRUPT].supported = 1,
+	[MSM_PM_SLEEP_MODE_WAIT_FOR_INTERRUPT].suspend_enabled = 1,
+	[MSM_PM_SLEEP_MODE_WAIT_FOR_INTERRUPT].idle_enabled = 1,
+	[MSM_PM_SLEEP_MODE_WAIT_FOR_INTERRUPT].latency = 2,
+	[MSM_PM_SLEEP_MODE_WAIT_FOR_INTERRUPT].residency = 0,
 };
 
 static void
@@ -2497,7 +2543,7 @@ static void __init qsd8x50_init(void)
 	msm_pm_set_platform_data(msm_pm_data, ARRAY_SIZE(msm_pm_data));
 
 #ifdef CONFIG_SURF_FFA_GPIO_KEYPAD
-	if (machine_is_qsd8x50_ffa())
+	if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa())
 		platform_device_register(&keypad_device_8k_ffa);
 	else
 		platform_device_register(&keypad_device_surf);
@@ -2511,7 +2557,8 @@ static void __init qsd8x50_allocate_memory_regions(void)
 
 	size = pmem_kernel_ebi1_size;
 	if (size) {
-		addr = alloc_bootmem_align(size, 0x100000);
+		addr = alloc_bootmem_aligned(size, 0x100000);
+		android_pmem_kernel_ebi1_pdata.start = __pa(addr);
 		android_pmem_kernel_ebi1_pdata.size = size;
 		pr_info("allocating %lu bytes at %p (%lx physical) for kernel"
 			" ebi1 pmem arena\n", size, addr, __pa(addr));
@@ -2526,6 +2573,7 @@ static void __init qsd8x50_allocate_memory_regions(void)
 		size = MSM_PMEM_SMIPOOL_SIZE;
 	}
 
+	android_pmem_kernel_smi_pdata.start = MSM_PMEM_SMIPOOL_BASE;
 	android_pmem_kernel_smi_pdata.size = size;
 
 	pr_info("allocating %lu bytes at %lx (%lx physical)"
@@ -2537,6 +2585,7 @@ static void __init qsd8x50_allocate_memory_regions(void)
 	size = pmem_mdp_size;
 	if (size) {
 		addr = alloc_bootmem(size);
+		android_pmem_pdata.start = __pa(addr);
 		android_pmem_pdata.size = size;
 		pr_info("allocating %lu bytes at %p (%lx physical) for mdp "
 			"pmem arena\n", size, addr, __pa(addr));
@@ -2545,6 +2594,7 @@ static void __init qsd8x50_allocate_memory_regions(void)
 	size = pmem_adsp_size;
 	if (size) {
 		addr = alloc_bootmem(size);
+		android_pmem_adsp_pdata.start = __pa(addr);
 		android_pmem_adsp_pdata.size = size;
 		pr_info("allocating %lu bytes at %p (%lx physical) for adsp "
 			"pmem arena\n", size, addr, __pa(addr));
@@ -2571,12 +2621,12 @@ static void __init es209ra_fixup(struct machine_desc *desc, struct tag *tags,
 {
 	mi->nr_banks=2;
 	mi->bank[0].start = PHYS_OFFSET;
-	//mi->bank[0].node = PHYS_TO_NID(mi->bank[0].start);
+	mi->bank[0].node = PHYS_TO_NID(mi->bank[0].start);
 	mi->bank[0].size = (232*1024*1024);
 
 	mi->bank[1].start = 0x30000000;
 	mi->bank[1].size = (127*1024*1024);
-	//mi->bank[1].node = PHYS_TO_NID(mi->bank[1].start);
+	mi->bank[1].node = PHYS_TO_NID(mi->bank[1].start);
 }
 
 static void __init qsd8x50_map_io(void)
