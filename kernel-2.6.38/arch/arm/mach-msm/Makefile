@@ -1,6 +1,14 @@
-obj-y += io.o dma.o memory.o timer.o
-obj-y += clock.o clock-voter.o clock-dummy.o
+obj-y += io.o dma.o memory.o
+obj-y += proc_comm.o
+obj-y += vreg.o mpp.o
+obj-y += vreg.o
+obj-y += clock.o clock-pcom.o clock-voter.o clock-dummy.o
+obj-y += nand_partitions.o
 obj-y += modem_notifier.o subsystem_map.o
+obj-y += rpc_hsusb.o rpc_pmapp.o rpc_fsusb.o
+obj-y += socinfo.o
+obj-y += pmic.o
+#obj-y += internal_power_rail.o
 obj-$(CONFIG_CPU_FREQ_MSM) += cpufreq.o
 obj-$(CONFIG_DEBUG_FS) += nohlt.o clock-debug.o
 obj-$(CONFIG_KEXEC) += msm_kexec.o
@@ -17,8 +25,8 @@ endif
 	endif
 endif
 
-obj-$(CONFIG_ARCH_MSM_ARM11) += acpuclock.o
-obj-$(CONFIG_ARCH_MSM_SCORPION) += pmu.o
+obj-$(CONFIG_ARCH_MSM_ARM11) += acpuclock.o timer.o
+obj-$(CONFIG_ARCH_MSM_SCORPION) += pmu.o timer.o
 obj-$(CONFIG_ARCH_MSM_CORTEX_A5) += acpuclock.o
 obj-$(CONFIG_ARCH_MSM_KRAIT) += msm-krait-l2-accessors.o pmu.o
 
@@ -143,6 +151,7 @@ obj-$(CONFIG_MACH_QSD8X50_SURF) += board-qsd8x50.o
 obj-$(CONFIG_MACH_QSD8X50_FFA) += board-qsd8x50.o
 obj-$(CONFIG_MACH_QSD8X50A_SURF) += board-qsd8x50.o
 obj-$(CONFIG_MACH_QSD8X50A_FFA) += board-qsd8x50.o
+obj-$(CONFIG_MACH_ES209RA) += board-es209ra.o board-es209ra-keypad.o
 obj-$(CONFIG_ARCH_MSM8X60) += devices-msm8x60.o clock-local.o clock-8x60.o acpuclock-8x60.o
 obj-$(CONFIG_ARCH_MSM8X60) += clock-rpm.o
 obj-$(CONFIG_ARCH_MSM8X60) += saw-regulator.o

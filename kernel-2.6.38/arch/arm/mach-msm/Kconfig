@@ -551,6 +551,15 @@ config MACH_FSM9XXX_SURF
 	  chipset based SURF evaluation board and
 	  FFA board.
 
+config MACH_ES209RA
+	depends on ARCH_QSD8X50
+	depends on MSM_SOC_REV_NONE
+	depends on MSM_STACKED_MEMORY
+	default y
+	bool "QSD8x50 ES209RA (Rachael)"
+	help
+	  Support for the ES209RA (Rachael) SEMC product using QSD8x50.
+
 endmenu
 
 config MSM_STACKED_MEMORY
@@ -799,7 +808,7 @@ config HTC_PWRSINK
 
 config QSD_SVS
 	bool "QSD Static Voltage Scaling"
-	depends on (MACH_QSD8X50_SURF || MACH_QSD8X50_FFA || MACH_QSD8X50A_SURF || MACH_QSD8X50A_FFA)
+	depends on (MACH_QSD8X50_SURF || MACH_QSD8X50_FFA || MACH_QSD8X50A_SURF || MACH_QSD8X50A_FFA || MACH_ES209RA)
 	default y
 	select TPS65023
 	help
@@ -807,7 +816,7 @@ config QSD_SVS
 
 config QSD_PMIC_DEFAULT_DCDC1
 	int "PMIC default output voltage"
-	depends on (MACH_QSD8X50_SURF || MACH_QSD8X50_FFA || MACH_QSD8X50A_SURF || MACH_QSD8X50A_FFA)
+	depends on (MACH_QSD8X50_SURF || MACH_QSD8X50_FFA || MACH_QSD8X50A_SURF || MACH_QSD8X50A_FFA || MACH_ES209RA)
 	default 1250
 	help
 	  This is the PMIC voltage at Linux kernel boot.
