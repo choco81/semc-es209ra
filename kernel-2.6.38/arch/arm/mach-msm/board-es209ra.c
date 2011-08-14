@@ -110,6 +110,7 @@
 #define ADSPCORE_RAM_END   0x2FFFFFFF
 #endif
 
+#ifdef CONFIG_SMC91X
 static struct resource smc91x_resources[] = {
 	[0] = {
 		.flags  = IORESOURCE_MEM,
@@ -118,6 +119,7 @@ static struct resource smc91x_resources[] = {
 		.flags  = IORESOURCE_IRQ,
 	},
 };
+#endif
 
 #ifdef CONFIG_USB_FUNCTION
 static struct usb_mass_storage_platform_data usb_mass_storage_pdata = {
@@ -2288,6 +2290,7 @@ static void __init qsd8x50_init_mmc(void)
 
 }
 
+#ifdef CONFIG_SMC91X
 static void __init qsd8x50_cfg_smc91x(void)
 {
 	int rc = 0;
@@ -2313,6 +2316,7 @@ static void __init qsd8x50_cfg_smc91x(void)
 	} else
 		printk(KERN_ERR "%s: invalid machine type\n", __func__);
 }
+#endif
 
 static struct msm_pm_platform_data msm_pm_data[MSM_PM_SLEEP_MODE_NR] = {
 	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE] = {
@@ -2461,7 +2465,9 @@ static void __init qsd8x50_init(void)
 		printk(KERN_ERR "%s: socinfo_init() failed!\n",
 		       __func__);
 	msm_clock_init(msm_clocks_8x50, msm_num_clocks_8x50);
+#ifdef CONFIG_SMC91X
 	qsd8x50_cfg_smc91x();
+#endif
 	msm_acpu_clock_init(&qsd8x50_clock_data);
 
 	msm_hsusb_pdata.swfi_latency =

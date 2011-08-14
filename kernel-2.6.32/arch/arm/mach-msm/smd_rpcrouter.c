@@ -2252,8 +2252,22 @@ void msm_rpcrouter_xprt_notify(struct rpcrouter_xprt *xprt, unsigned event)
 	if (event == RPCROUTER_XPRT_EVENT_OPEN)
 		msm_rpcrouter_add_xprt(xprt);
 
-	if (!xprt_info)
+	//if (!xprt_info)
+	//	return;
+	if (!xprt_info) {
+		union rr_control_msg msg = { 0 };
+
+		while (!xprt->priv)
+			msleep(50);
+		xprt_info = xprt->priv;
+		msg.cmd = RPCROUTER_CTRL_CMD_BYE;
+		process_control_msg(xprt_info, &msg, sizeof(msg));
+		msleep(100);
+		msg.cmd = RPCROUTER_CTRL_CMD_HELLO;
+		process_control_msg(xprt_info, &msg, sizeof(msg));
+		msleep(100);
 		return;
+	}
 
 	/* Check read_avail even for OPEN event to handle missed
 	   DATA events while processing the OPEN event*/

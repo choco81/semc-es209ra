@@ -642,8 +642,27 @@ config QFP_FUSE
 	  to the fuse block. Currently this is supported only
 	  on FSM targets.
 
+config SEMCCLASS
+	bool "SEMC Class Support"
+	default y
+	---help---
+	  base class for various SEMC devices
+
+config SENSORS_ES209RA_PROXIMITY
+	bool "ES209RA Proximity Sensor"
+	default n
+
+config ES209RA_WLAN_POWER
+	bool "ES209RA WLAN Power driver"
+	default n
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
+source "drivers/misc/semc/seport/Kconfig"
+source "drivers/misc/semc/power/Kconfig"
+source "drivers/misc/semc/simcdetect/Kconfig"
+source "drivers/misc/semc/vibrator/Kconfig"
+source "drivers/misc/semc/gpio_matrix/Kconfig"
 source "drivers/misc/cb710/Kconfig"
 source "drivers/misc/iwmc3200top/Kconfig"
 source "drivers/misc/ti-st/Kconfig"
