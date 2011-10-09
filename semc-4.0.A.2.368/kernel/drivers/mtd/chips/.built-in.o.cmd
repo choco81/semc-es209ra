@@ -1,0 +1,1 @@
+cmd_drivers/mtd/chips/built-in.o :=  /home/tsuyo/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-ld -EL    -r -o drivers/mtd/chips/built-in.o drivers/mtd/chips/chipreg.o drivers/mtd/chips/cfi_probe.o drivers/mtd/chips/cfi_util.o drivers/mtd/chips/gen_probe.o 

@@ -106,7 +106,7 @@ int msm_proc_comm(unsigned cmd, unsigned *data1, unsigned *data2)
 again:
 	if (proc_comm_wait_for(base + MDM_STATUS, PCOM_READY))
 		goto again;
-
+	
 	writel(cmd, base + APP_COMMAND);
 	writel(data1 ? *data1 : 0, base + APP_DATA1);
 	writel(data2 ? *data2 : 0, base + APP_DATA2);
@@ -115,7 +115,7 @@ again:
 
 	if (proc_comm_wait_for(base + APP_COMMAND, PCOM_CMD_DONE))
 		goto again;
-
+	
 	if (readl(base + APP_STATUS) == PCOM_CMD_SUCCESS) {
 		if (data1)
 			*data1 = readl(base + APP_DATA1);
@@ -129,6 +129,7 @@ again:
 	writel(PCOM_CMD_IDLE, base + APP_COMMAND);
 
 	spin_unlock_irqrestore(&proc_comm_lock, flags);
+
 	return ret;
 }
 EXPORT_SYMBOL(msm_proc_comm);

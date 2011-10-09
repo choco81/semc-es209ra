@@ -1,0 +1,1 @@
+cmd_arch/arm/mach-msm/reset_modem.ko := /home/tsuyo/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-ld -EL -r  -T /home/tsuyo/semc-es209ra/semc-4.0.A.2.368/kernel/scripts/module-common.lds --build-id -o arch/arm/mach-msm/reset_modem.ko arch/arm/mach-msm/reset_modem.o arch/arm/mach-msm/reset_modem.mod.o

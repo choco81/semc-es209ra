@@ -1,0 +1,1 @@
+cmd_drivers/misc/semc/vibrator/built-in.o :=  /home/tsuyo/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-ld -EL    -r -o drivers/misc/semc/vibrator/built-in.o drivers/misc/semc/vibrator/msm-pmic-vibrator.o 

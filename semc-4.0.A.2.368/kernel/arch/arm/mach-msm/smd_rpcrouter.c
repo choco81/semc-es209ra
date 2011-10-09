@@ -242,8 +242,13 @@ static int rpcrouter_send_control_msg(struct rpcrouter_xprt_info *xprt_info,
 	if (xprt_info->remote_pid == RPCROUTER_PID_LOCAL)
 		return 0;
 
+#ifdef CONFIG_MACH_ES209RA
+	if (!(msg->cmd == RPCROUTER_CTRL_CMD_HELLO || msg->cmd == RPCROUTER_CTRL_CMD_BYE) &&
+	    !xprt_info->initialized) {
+#else
 	if (!(msg->cmd == RPCROUTER_CTRL_CMD_HELLO) &&
 	    !xprt_info->initialized) {
+#endif
 		printk(KERN_ERR "rpcrouter_send_control_msg(): Warning, "
 		       "router not initialized\n");
 		return -EINVAL;
@@ -2284,8 +2289,25 @@ void msm_rpcrouter_xprt_notify(struct rpcrouter_xprt *xprt, unsigned event)
 	if (event == RPCROUTER_XPRT_EVENT_OPEN)
 		msm_rpcrouter_add_xprt(xprt);
 
+#ifdef CONFIG_MACH_ES209RA
+	if (!xprt_info) {
+		union rr_control_msg msg = { 0 };
+
+		while (!xprt->priv)
+			msleep(50);
+		xprt_info = xprt->priv;
+		msg.cmd = RPCROUTER_CTRL_CMD_BYE;
+		process_control_msg(xprt_info, &msg, sizeof(msg));
+		msleep(100);
+		msg.cmd = RPCROUTER_CTRL_CMD_HELLO;
+		process_control_msg(xprt_info, &msg, sizeof(msg));
+		msleep(100);
+		return;
+	}
+#else
 	if (!xprt_info)
 		return;
+#endif
 
 	/* Check read_avail even for OPEN event to handle missed
 	   DATA events while processing the OPEN event*/

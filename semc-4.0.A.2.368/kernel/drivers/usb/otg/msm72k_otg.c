@@ -2524,6 +2524,7 @@ static int __init msm_otg_probe(struct platform_device *pdev)
 		ret = PTR_ERR(dev->hs_clk);
 		goto rpc_fail;
 	}
+
 	clk_set_rate(dev->hs_clk, 60000000);
 
 	if (!dev->pdata->usb_in_sps) {
@@ -2611,7 +2612,10 @@ static int __init msm_otg_probe(struct platform_device *pdev)
 					PM_QOS_DEFAULT_VALUE);
 	pm_qos_add_requirement(PM_QOS_SYSTEM_BUS_FREQ, DRIVER_NAME,
 					PM_QOS_DEFAULT_VALUE);
+
+#ifndef CONFIG_MACH_ES209RA
 	otg_pm_qos_update_axi(dev, 1);
+#endif
 
 	/* To reduce phy power consumption and to avoid external LDO
 	 * on the board, PMIC comparators can be used to detect VBUS
@@ -2717,7 +2721,6 @@ static int __init msm_otg_probe(struct platform_device *pdev)
 		otg_debugfs_cleanup();
 		goto chg_deinit;
 	}
-
 
 	return 0;
 

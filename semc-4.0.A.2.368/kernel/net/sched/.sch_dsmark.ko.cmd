@@ -1,0 +1,1 @@
+cmd_net/sched/sch_dsmark.ko := /home/tsuyo/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-ld -EL -r  -T /home/tsuyo/semc-es209ra/semc-4.0.A.2.368/kernel/scripts/module-common.lds --build-id -o net/sched/sch_dsmark.ko net/sched/sch_dsmark.o net/sched/sch_dsmark.mod.o

@@ -164,12 +164,41 @@ struct msm_camera_sensor_info {
 	struct msm_camera_sensor_flash_data *flash_data;
 	int csi_if;
 	struct msm_camera_csi_params csi_params;
+#ifdef CONFIG_MACH_ES209RA
+	int sensor_int;
+	int sensor_vsync;
+	struct msm_camera_sensor_pwr standby;
+	struct msm_camera_sensor_pwr vcam_sd12;
+	struct msm_camera_sensor_pwr vcam_sdap;
+	struct msm_camera_sensor_pwr vcam_sa28;
+	struct msm_camera_sensor_pwr vcam_io;
+	struct msm_camera_sensor_pwr vcam_af30;
+
+	struct msm_camera_sensor_pwr vcam_l1;
+	struct msm_camera_sensor_pwr vcam_l2;
+	struct msm_camera_sensor_pwr vcam_sd;
+	struct msm_camera_sensor_pwr vcam_af;
+	struct msm_camera_sensor_pwr vcam_sa;
+	struct msm_camera_sensor_strobe_flash_data *strobe_flash_data;
+#else
 	struct msm_camera_sensor_pwr vcam_io;
 	struct msm_camera_sensor_pwr vcam_sd;
 	struct msm_camera_sensor_pwr vcam_af;
 	struct msm_camera_sensor_pwr vcam_sa;
 	struct msm_camera_sensor_strobe_flash_data *strobe_flash_data;
+#endif
 };
+
+#ifdef CONFIG_MACH_ES209RA
+struct panel_data_ext {
+	void (*power_on) (void);
+	void (*power_off) (void);
+	void (*window_adjust) (u16 x1, u16 x2, u16 y1, u16 y2);
+	void (*exit_deep_standby) (void);
+	int use_dma_edge_pixels_fix;
+	void (*backlight_ctrl) (bool);
+};
+#endif
 
 struct clk;
 

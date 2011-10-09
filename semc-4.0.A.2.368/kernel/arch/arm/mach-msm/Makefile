@@ -1,6 +1,20 @@
 obj-y += io.o dma.o memory.o
-obj-y += clock.o
-obj-y += modem_notifier.o
+ifdef CONFIG_MACH_ES209RA
+	obj-y += proc_comm.o
+	obj-y += vreg.o mpp.o
+	obj-y += vreg.o
+	obj-y += clock.o clock-pcom.o
+	obj-y += nand_partitions.o
+	obj-y += modem_notifier.o
+	obj-y += rpc_hsusb.o rpc_pmapp.o rpc_fsusb.o
+	obj-y += socinfo.o
+	obj-y += pmic.o
+	obj-y += internal_power_rail.o
+else
+	obj-y += clock.o
+	obj-y += modem_notifier.o
+endif
+
 obj-$(CONFIG_CPU_FREQ_MSM) += cpufreq.o
 obj-$(CONFIG_DEBUG_FS) += nohlt.o clock-debug.o
 
@@ -59,6 +73,7 @@ obj-$(CONFIG_MSM_SMD_QMI) += smd_qmi.o
 obj-$(CONFIG_MSM_SMD_PKT) += smd_pkt.o
 obj-$(CONFIG_MSM_SDIO_CTL) += sdio_ctl.o
 obj-$(CONFIG_MSM_SMD_NMEA) += smd_nmea.o
+obj-$(CONFIG_DEBUG_FS) += pmic_debugfs.o
 obj-$(CONFIG_MSM_RESET_MODEM) += reset_modem.o
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter.o
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter_device.o
@@ -109,6 +124,7 @@ obj-$(CONFIG_MACH_QSD8X50_FFA) += board-qsd8x50.o
 obj-$(CONFIG_MACH_QSD8X50A_SURF) += board-qsd8x50.o
 obj-$(CONFIG_MACH_QSD8X50A_FFA) += board-qsd8x50.o
 obj-$(CONFIG_MACH_QSD8X50A_ST1_5) += board-qsd8x50a-st1x.o
+obj-$(CONFIG_MACH_ES209RA) += board-es209ra.o board-es209ra-keypad.o msm_vibrator.o
 obj-$(CONFIG_ARCH_MSM8X60) += devices-msm8x60.o
 obj-$(CONFIG_ARCH_MSM8X60) += clock-local.o clock-8x60.o acpuclock-8x60.o
 obj-$(CONFIG_ARCH_MSM8X60) += clock-8x60_mxo.o clock-rpm.o spm.o restart.o
@@ -166,9 +182,16 @@ obj-$(CONFIG_HTC_PWRSINK) += htc_pwrsink.o
 obj-$(CONFIG_HTC_HEADSET) += htc_headset.o
 obj-$(CONFIG_MSM_RMT_STORAGE_CLIENT) += rmt_storage_client.o
 obj-$(CONFIG_PMIC8058) += pmic8058-gpio.o pmic8058-mpp.o
+obj-$(CONFIG_SEMC_SEPORT_PLATFORM) += semc_seport_platform.o
+obj-$(CONFIG_SEMC_POWER) += semc_power_platform.o
+obj-$(CONFIG_ES209RA_HEADSET) += es209ra_headset.o
 obj-$(CONFIG_MSM_NPA) += npa.o npa_resources.o msm_pm_qos.o msm_reqs.o
 obj-$(CONFIG_MSM_NPA_REMOTE) += npa_remote.o
 obj-$(CONFIG_MSM_NPA_REMOTE_ONCRPC) += npa_remote_rpc_client.o
+obj-$(CONFIG_MAX17040_FUELGAUGE) += semc_max17040_settings.o
+obj-$(CONFIG_SEMC_LOW_BATT_SHUTDOWN) += semc_low_batt_shutdown.o
+
+obj-$(CONFIG_SEMC_RPC_SERVER_HANDSET) += semc_rpc_server_handset.o
 obj-$(CONFIG_ARCH_MSM7X30) += spm.o
 obj-$(CONFIG_MSM_RPM) += rpm.o
 obj-$(CONFIG_MSM_RPM_LOG) += rpm_log.o
@@ -199,6 +222,7 @@ ifdef CONFIG_ARCH_MSM7X30
 	obj-$(CONFIG_SIMPLE_REMOTE_PLATFORM) += simple_remote_msm7x30_pf.o
 endif
 
+obj-$(CONFIG_SEMC_RPC_SERVER_HANDSET) += semc_rpc_server_handset.o
 obj-$(CONFIG_PMIC_TIME) += pmic_time.o
 
 obj-$(CONFIG_SEMC_MOGAMI_FELICA_SUPPORT) += semc_mogami_felica.o
