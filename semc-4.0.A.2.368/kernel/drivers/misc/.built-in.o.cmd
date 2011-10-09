@@ -1,1 +1,0 @@
-cmd_drivers/misc/built-in.o :=  /home/tsuyo/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-ld -EL    -r -o drivers/misc/built-in.o drivers/misc/pmem.o drivers/misc/semc/vibrator/built-in.o drivers/misc/es209ra_proximity.o drivers/misc/es209ra_wlan_power.o drivers/misc/eeprom/built-in.o drivers/misc/cb710/built-in.o drivers/misc/semc/gpio_matrix/built-in.o 
