@@ -108,7 +108,7 @@ config BATTERY_DA9030
 	  Say Y here to enable support for batteries charger integrated into
 	  DA9030 PMIC.
 
-config BATTERY_MAX17040
+config MAX17040_FUELGAUGE
 	tristate "Maxim MAX17040 Fuel Gauge"
 	depends on I2C
 	help

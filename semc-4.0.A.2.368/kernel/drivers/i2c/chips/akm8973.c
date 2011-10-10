@@ -608,11 +608,13 @@ int akm8973_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	}
 	this_client = client;
 
+#ifndef CONFIG_MACH_ES209RA
 	err = AKECS_PowerDown();
 	if (err < 0) {
 		printk(KERN_ERR"AKM8973 akm8973_probe: set power down mode error\n");
 		goto exit_set_mode_failed;
 	}
+#endif
 
 	err = request_irq(client->irq, akm8973_interrupt, IRQF_TRIGGER_HIGH,
 			  "akm8973", akm);
@@ -703,7 +705,9 @@ exit_input_register_device_failed:
 exit_input_dev_alloc_failed:
 	free_irq(client->irq, akm);
 exit_irq_request_failed:
+#ifndef CONFIG_MACH_ES209RA
 exit_set_mode_failed:
+#endif
 exit_platform_data_null:
 	kfree(akm);
 exit_alloc_data_failed:
