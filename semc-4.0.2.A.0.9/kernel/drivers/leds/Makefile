@@ -35,6 +35,7 @@ obj-$(CONFIG_LEDS_PMIC8058)		+= leds-pmic8058.o
 obj-$(CONFIG_LEDS_AS3676)               += leds-as3676.o
 obj-$(CONFIG_LEDS_LOW_CURRENT_PMIC)     += leds-low-current-pmic.o
 obj-$(CONFIG_LEDS_QCIBL)		+= leds-qci-backlight.o
+obj-$(CONFIG_LEDS_LV5219LG)		+= leds-lv5219lg.o
 
 # LED SPI Drivers
 obj-$(CONFIG_LEDS_DAC124S085)		+= leds-dac124s085.o
