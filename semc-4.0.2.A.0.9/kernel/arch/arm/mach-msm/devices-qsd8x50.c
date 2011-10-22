@@ -29,6 +29,10 @@
 
 #include <asm/mach/mmc.h>
 #include <mach/msm_hsusb.h>
+#ifdef CONFIG_MACH_ES209RA
+#include "smd_private.h"
+#include <mach/msm_serial_hs.h>
+#endif
 
 static struct resource resources_uart1[] = {
 	{
@@ -124,6 +128,12 @@ static struct resource msm_uart1_dm_resources[] = {
 
 static u64 msm_uart_dm1_dma_mask = DMA_BIT_MASK(32);
 
+#ifdef CONFIG_MACH_ES209RA
+static struct msm_serial_hs_platform_data bt_uart_platform_data = {
+	.wakeup_irq = MSM_GPIO_TO_INT(44),
+	//.wakeup_edge = IRQF_TRIGGER_RISING,
+};
+#endif
 struct platform_device msm_device_uart_dm1 = {
 	.name = "msm_serial_hs",
 	.id = 0,
@@ -132,6 +142,9 @@ struct platform_device msm_device_uart_dm1 = {
 	.dev		= {
 		.dma_mask = &msm_uart_dm1_dma_mask,
 		.coherent_dma_mask = DMA_BIT_MASK(32),
+#ifdef CONFIG_MACH_ES209RA
+		.platform_data = &bt_uart_platform_data,
+#endif
 	},
 };
 
@@ -422,6 +435,9 @@ static struct resource resources_sdc1[] = {
 		.start	= INT_SDC1_0,
 		.end	= INT_SDC1_1,
 		.flags	= IORESOURCE_IRQ,
+#ifdef CONFIG_MACH_ES209RA
+		.name	= "irq",
+#endif
 	},
 	{
 		.start	= 8,
@@ -440,6 +456,9 @@ static struct resource resources_sdc2[] = {
 		.start	= INT_SDC2_0,
 		.end	= INT_SDC2_1,
 		.flags	= IORESOURCE_IRQ,
+#ifdef CONFIG_MACH_ES209RA
+		.name	= "irq",
+#endif
 	},
 	{
 		.start	= 8,
@@ -645,6 +664,12 @@ static struct platform_device msm_lcdc_device = {
 	.id     = 0,
 };
 
+#ifdef CONFIG_MACH_ES209RA
+static struct platform_device msm_dtv_device = {
+	.name   = "dtv",
+	.id     = 0,
+};
+#endif
 static struct platform_device msm_tvenc_device = {
 	.name   = "tvenc",
 	.id     = 0,
@@ -787,6 +812,10 @@ void __init msm_fb_register_device(char *name, void *data)
 		msm_register_device(&msm_tvenc_device, data);
 	else if (!strncmp(name, "lcdc", 4))
 		msm_register_device(&msm_lcdc_device, data);
+#ifdef CONFIG_MACH_ES209RA
+	else if (!strncmp(name, "dtv", 3))
+		msm_register_device(&msm_dtv_device, data);
+#endif
 	else
 		printk(KERN_ERR "%s: unknown device! %s\n", __func__, name);
 }
@@ -823,7 +852,11 @@ struct clk msm_clocks_8x50[] = {
 	CLK_PCOM("mdp_clk",	MDP_CLK,	NULL, OFF),
 	CLK_PCOM("mdp_lcdc_pclk_clk", MDP_LCDC_PCLK_CLK, NULL, 0),
 	CLK_PCOM("mdp_lcdc_pad_pclk_clk", MDP_LCDC_PAD_PCLK_CLK, NULL, 0),
+#ifdef CONFIG_MACH_ES209RA
+	CLK_PCOM("mdp_vsync_clk",	MDP_VSYNC_CLK,	NULL, 0),
+#else
 	CLK_PCOM("mdp_vsync_clk",	MDP_VSYNC_CLK,	NULL, OFF),
+#endif
 	CLK_PCOM("pbus_clk",	PBUS_CLK,	NULL, CLK_MIN),
 	CLK_PCOM("pcm_clk",	PCM_CLK,	NULL, 0),
 	CLK_PCOM("sdac_clk",	SDAC_CLK,	NULL, OFF),
