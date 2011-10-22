@@ -47,6 +47,9 @@
 #include "smd_rpcrouter.h"
 #include "modem_notifier.h"
 #include "smd_rpc_sym.h"
+#ifdef CONFIG_MACH_ES209RA
+#include "smd_private.h"
+#endif
 
 enum {
 	SMEM_LOG = 1U << 0,
@@ -242,8 +245,13 @@ static int rpcrouter_send_control_msg(struct rpcrouter_xprt_info *xprt_info,
 	if (xprt_info->remote_pid == RPCROUTER_PID_LOCAL)
 		return 0;
 
+#ifdef CONFIG_MACH_ES209RA
+	if (!(msg->cmd == RPCROUTER_CTRL_CMD_HELLO || msg->cmd == RPCROUTER_CTRL_CMD_BYE) &&
+	    !xprt_info->initialized) {
+#else
 	if (!(msg->cmd == RPCROUTER_CTRL_CMD_HELLO) &&
 	    !xprt_info->initialized) {
+#endif
 		printk(KERN_ERR "rpcrouter_send_control_msg(): Warning, "
 		       "router not initialized\n");
 		return -EINVAL;
@@ -2279,13 +2287,39 @@ static int msm_rpcrouter_add_xprt(struct rpcrouter_xprt *xprt)
 void msm_rpcrouter_xprt_notify(struct rpcrouter_xprt *xprt, unsigned event)
 {
 	struct rpcrouter_xprt_info *xprt_info = xprt->priv;
+#ifdef CONFIG_MACH_ES209RA
+	union rr_control_msg msg = { 0 }; 
+#endif
 
 	/* TODO: need to close the transport upon close event */
 	if (event == RPCROUTER_XPRT_EVENT_OPEN)
 		msm_rpcrouter_add_xprt(xprt);
 
+#ifdef CONFIG_MACH_ES209RA
+	if (!xprt_info) { 
+		smsm_change_state(SMSM_APPS_STATE, 0, SMSM_RPCINIT);
+		msleep(50); 
+		xprt_info = xprt->priv; 
+		msg.cmd = RPCROUTER_CTRL_CMD_BYE; 
+		rpcrouter_send_control_msg(xprt_info, &msg); 
+		msleep(50); 
+		msg.cmd = RPCROUTER_CTRL_CMD_HELLO; 
+		rpcrouter_send_control_msg(xprt_info, &msg); 
+		msleep(50); 
+		msg.cmd = RPCROUTER_CTRL_CMD_BYE; 
+		rpcrouter_send_control_msg(xprt_info, &msg); 
+		msleep(50); 
+		msg.cmd = RPCROUTER_CTRL_CMD_HELLO; 
+		rpcrouter_send_control_msg(xprt_info, &msg); 
+		msleep(50); 
+		process_control_msg(xprt_info, &msg, sizeof(msg)); 
+		msleep(100); 
+		return; 
+	} 
+#else
 	if (!xprt_info)
 		return;
+#endif
 
 	/* Check read_avail even for OPEN event to handle missed
 	   DATA events while processing the OPEN event*/
