@@ -2659,7 +2659,9 @@ static int __init msm_otg_probe(struct platform_device *pdev)
 					PM_QOS_DEFAULT_VALUE);
 	pm_qos_add_requirement(PM_QOS_SYSTEM_BUS_FREQ, DRIVER_NAME,
 					PM_QOS_DEFAULT_VALUE);
+#ifndef CONFIG_MACH_ES209RA
 	otg_pm_qos_update_axi(dev, 1);
+#endif
 
 	/* To reduce phy power consumption and to avoid external LDO
 	 * on the board, PMIC comparators can be used to detect VBUS
