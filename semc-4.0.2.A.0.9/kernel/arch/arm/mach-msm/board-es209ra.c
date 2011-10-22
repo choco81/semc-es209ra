@@ -80,7 +80,6 @@
 #include <asm/setup.h>
 #include "qdsp6/q6audio.h"
 #include <../../../drivers/video/msm/mddi_tmd_nt35580.h>
-#include <mach/semc_battery_data.h>
 #ifdef CONFIG_SEMC_LOW_BATT_SHUTDOWN
 #include <mach/semc_low_batt_shutdown.h>
 #endif /* CONFIG_SEMC_LOW_BATT_SHUTDOWN */
@@ -145,8 +144,6 @@
 #define ADSPCORE_RAM_START 0x2E000000
 #define ADSPCORE_RAM_END   0x2FFFFFFF
 #endif
-
-#define USB_VREG_MV		3500	/* usb voltage regulator mV */
 
 #ifdef CONFIG_SEMC_MSM_PMIC_VIBRATOR
 static int msm7227_platform_set_vib_voltage(u16 volt_mv)
@@ -441,10 +438,9 @@ static void msm_fsusb_setup_gpio(unsigned int enable)
 
 #define MSM_USB_BASE              ((unsigned)addr)
 
-//static struct vreg *vreg_usb;
+static struct vreg *vreg_usb;
 static void msm_hsusb_vbus_power(unsigned phy_info, int on)
 {
-/*
 	switch (PHY_TYPE(phy_info)) {
 	case USB_PHY_INTEGRATED:
 		if (on)
@@ -462,22 +458,13 @@ static void msm_hsusb_vbus_power(unsigned phy_info, int on)
 		pr_err("%s: undefined phy type ( %X ) \n", __func__,
 						phy_info);
 	}
-*/
 }
 
 static struct msm_usb_host_platform_data msm_usb_host_pdata = {
 	.phy_info	= (USB_PHY_INTEGRATED | USB_PHY_MODEL_180NM),
-	.power_budget = 180,
 };
 
-/*
 static struct msm_hsusb_platform_data msm_hsusb_pdata = {
-};
-*/
-
-/* Driver(s) to be notified upon change in USB */
-static char *hsusb_chg_supplied_to[] = {
-	MAX17040_NAME,
 };
 
 #ifdef CONFIG_USB_FS_HOST
@@ -1387,24 +1374,6 @@ static struct msm_acpu_clock_platform_data qsd8x50_clock_data = {
 
 
 #ifdef CONFIG_MAX17040_FUELGAUGE
-/* Driver(s) to be notified upon change in bdata */
-static char *bdata_supplied_to[] = {
-	MAX17040_NAME,
-};
-
-static struct semc_battery_platform_data semc_battery_platform_data = {
-	.supplied_to = bdata_supplied_to,
-	.num_supplicants = ARRAY_SIZE(bdata_supplied_to),
-};
-
-static struct platform_device bdata_driver = {
-	.name = SEMC_BDATA_NAME,
-	.id = -1,
-	.dev = {
-		.platform_data = &semc_battery_platform_data,
-	},
-};
-
 static struct max17040_platform_data max17040_platform_data = {
 	.model_desc = {
 		.ocv_test = { 0xD9, 0x80 },
@@ -1541,7 +1510,6 @@ static uint32_t camera_on_gpio_table[] = {
 	GPIO_CFG(142, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), /* VCAMSD_EN */
 };
 
-/*
 static uint32_t camera_on_gpio_ffa_table[] = {
 	// parallel CAMERA interfaces 
 	GPIO_CFG(95,  1, GPIO_CFG_INPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_16MA), // I2C_SCL 
@@ -1554,7 +1522,6 @@ static uint32_t camera_off_gpio_ffa_table[] = {
 	// FFA front Sensor Reset 
 	GPIO_CFG(137,  0, GPIO_CFG_INPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_16MA),
 };
-*/
 	
 static void config_gpio_table(uint32_t *table, int len)
 {
@@ -1570,9 +1537,8 @@ static void config_gpio_table(uint32_t *table, int len)
 }
 
 static struct vreg *vreg_gp2;
-//static struct vreg *vreg_gp3;
+static struct vreg *vreg_gp3;
 
-/*
 static void msm_camera_vreg_config(int vreg_en)
 {
 	int rc;
@@ -1633,11 +1599,9 @@ static void msm_camera_vreg_config(int vreg_en)
 		}
 	}
 }
-*/
 
 static void config_camera_on_gpios(void)
 {
-#if 0
 	int vreg_en = 1;
 
 	if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
@@ -1647,14 +1611,12 @@ static void config_camera_on_gpios(void)
 		msm_camera_vreg_config(vreg_en);
 		gpio_set_value(137, 0);
 	}
-#endif
 	config_gpio_table(camera_on_gpio_table,
 		ARRAY_SIZE(camera_on_gpio_table));
 }
 
 static void config_camera_off_gpios(void)
 {
-#if 0
 	int vreg_en = 0;
 
 	if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa()) {
@@ -1663,7 +1625,6 @@ static void config_camera_off_gpios(void)
 
 		msm_camera_vreg_config(vreg_en);
 	}
-#endif
 	config_gpio_table(camera_off_gpio_table,
 		ARRAY_SIZE(camera_off_gpio_table));
 }
@@ -1742,7 +1703,6 @@ static struct platform_device msm_wlan_ar6000_pm_device = {
         .resource       = NULL,
 };
 
-/*
 static u32 msm_calculate_batt_capacity(u32 current_voltage);
 
 static struct msm_psy_batt_pdata msm_psy_batt_data = {
@@ -1767,7 +1727,6 @@ static struct platform_device msm_batt_device = {
 	.id		    = -1,
 	.dev.platform_data  = &msm_psy_batt_data,
 };
-*/
 
 #ifdef CONFIG_SEMC_LOW_BATT_SHUTDOWN
 static struct lbs_platform_data lbs_data = {
@@ -1837,12 +1796,6 @@ static struct platform_device *devices[] __initdata = {
 #endif
 	&msm_device_smd,
 	&msm_device_dmov,
-#ifdef CONFIG_USB_MSM_OTG_72K
-	&msm_device_otg,
-#endif
-#ifdef CONFIG_USB_FUNCTION_MSM_HSUSB
-	&msm_device_gadget_peripheral,
-#endif
 	&android_pmem_kernel_ebi1_device,
 #ifdef CONFIG_KERNEL_PMEM_SMI_REGION
 	&android_pmem_kernel_smi_device,
@@ -1858,9 +1811,9 @@ static struct platform_device *devices[] __initdata = {
 	&mass_storage_device,
 #endif
 */
-	&rndis_device,
-	&usb_mass_storage_device,
 #ifdef CONFIG_USB_ANDROID
+	&usb_mass_storage_device,
+	&rndis_device,
 	&android_usb_device,
 #endif
 	&msm_device_tssc,
@@ -1900,8 +1853,7 @@ static struct platform_device *devices[] __initdata = {
 #ifdef CONFIG_PMIC_TIME
 	&pmic_time_device,
 #endif
-	&bdata_driver,
-	//&msm_batt_device,
+	&msm_batt_device,
 };
 
 static void __init es209ra_init_irq(void)
@@ -2026,7 +1978,6 @@ static void __init qsd8x50_init_usb(void)
 	if (machine_is_qsd8x50_ffa())
 		regulator_3p3_is_internal = 1;
 
-/*
 #ifdef CONFIG_USB_MSM_OTG_72K
 	platform_device_register(&msm_device_otg);
 #endif
@@ -2034,7 +1985,6 @@ static void __init qsd8x50_init_usb(void)
 #ifdef CONFIG_USB_FUNCTION_MSM_HSUSB
 	platform_device_register(&msm_device_hsusb_peripheral);
 #endif
-*/
 
 #ifdef CONFIG_USB_MSM_72K
 	platform_device_register(&msm_device_gadget_peripheral);
@@ -2043,7 +1993,6 @@ static void __init qsd8x50_init_usb(void)
 	if (machine_is_qsd8x50_ffa() || machine_is_qsd8x50a_ffa())
 		return;
 
-/*
 	vreg_usb = vreg_get(NULL, "boost");
 
 	if (IS_ERR(vreg_usb)) {
@@ -2051,7 +2000,6 @@ static void __init qsd8x50_init_usb(void)
 		       __func__, PTR_ERR(vreg_usb));
 		return;
 	}
-*/
 
 	platform_device_register(&msm_device_hsusb_otg);
 	msm_add_host(0, &msm_usb_host_pdata);
@@ -2139,22 +2087,18 @@ static uint32_t msm_sdcc_setup_power(struct device *dv, unsigned int vdd)
 		clear_bit(pdev->id, &vreg_sts);
 
 		if (!vreg_sts) {
-#if 0
 			rc = vreg_disable(vreg_mmc);
 			if (rc)
 				printk(KERN_ERR "%s: return val: %d \n",
 					__func__, rc);
-#endif
 		}
 		return 0;
 	}
 
 	if (!vreg_sts) {
 		rc = vreg_set_level(vreg_mmc, PMIC_VREG_GP6_LEVEL);
-#if 0
 		if (!rc)
 			rc = vreg_enable(vreg_mmc);
-#endif
 		if (rc)
 			printk(KERN_ERR "%s: return val: %d \n",
 					__func__, rc);
@@ -2355,8 +2299,7 @@ static void __init msm_device_i2c_init(void)
 		pr_err("failed to request gpio i2c_sec_dat\n");
 #endif
 
-	//msm_i2c_pdata.rmutex = 1;
-	msm_i2c_pdata.rmutex = (uint32_t)smem_alloc(SMEM_I2C_MUTEX, 8);
+	msm_i2c_pdata.rmutex = 1;
 	msm_i2c_pdata.pm_lat =
 		msm_pm_data[MSM_PM_SLEEP_MODE_POWER_COLLAPSE_NO_XO_SHUTDOWN]
 		.latency;
@@ -2450,19 +2393,17 @@ static void __init es209ra_init(void)
 #endif
 	msm_acpu_clock_init(&qsd8x50_clock_data);
 
-/*
 	msm_hsusb_pdata.swfi_latency =
 		msm_pm_data
 		[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].latency;
 	msm_device_hsusb_peripheral.dev.platform_data = &msm_hsusb_pdata;
-*/
 
 	msm_otg_pdata.swfi_latency =
 		msm_pm_data
 		[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].latency;
 	msm_device_otg.dev.platform_data = &msm_otg_pdata;
 	msm_device_gadget_peripheral.dev.platform_data = &msm_gadget_pdata;
-	//msm_gadget_pdata.is_phy_status_timer_on = 1;
+	msm_gadget_pdata.is_phy_status_timer_on = 1;
 
 #if defined(CONFIG_TSIF) || defined(CONFIG_TSIF_MODULE)
 	msm_device_tsif.dev.platform_data = &tsif_platform_data;
@@ -2473,7 +2414,6 @@ static void __init es209ra_init(void)
 	config_camera_off_gpios(); /* might not be necessary */
 #endif
 	qsd8x50_init_usb();
-	hsusb_chg_set_supplicants(hsusb_chg_supplied_to,ARRAY_SIZE(hsusb_chg_supplied_to));
 	qsd8x50_init_mmc();
 	bt_power_init();
 	audio_gpio_init();
