@@ -2368,6 +2368,42 @@ config FB_MSM_MDDI_PANEL_AUTO_DETECT
 	---help---
 	  Support for MDDI panel auto detect
 
+config FB_MSM_MDDI_SEMC_LCD_POWER_OFF_SLEEP_MODE
+	depends on FB_MSM
+	bool "PowerOff sleep mode"
+	select FB_MSM_MDDI
+	---help---
+	  Support for Power Off as Sleep mode
+
+config FB_MSM_MDDI_SEMC_LCD_WINDOW_ADJUST
+	depends on FB_MSM
+	bool "Window Adjust help function"
+	select FB_MSM_MDDI
+	---help---
+	  Support separate window adjust
+
+config FB_MSM_MDDI_DISABLE_MDP_HW_VSYNC
+	depends on FB_MSM
+	bool "Disable QC define"
+	select FB_MSM_MDDI
+	---help---
+	  Disables the Qualcomm define MDP_HW_VSYNC
+
+config FB_MSM_SEMC_LCD_BACKLIGHT_CONTROL
+	depends on FB_MSM
+	bool "FB lcd backlight control"
+	select FB_MSM_MDDI
+	---help---
+	  Suspend/resume backlight from frambuffer (synchronize with
+	  display power on/off
+
+config FB_MSM_MDDI_TMD_NT35580
+	depends on FB_MSM
+	tristate "MDDI NT35580 LCD FWVGA Panel"
+	select FB_MSM_MDDI
+	---help---
+	  Support for MDDI NT35580 LCD FWVGA (480x854) panel
+
 config FB_MSM_MDDI_PRISM_WVGA
 	bool "MDDI Prism WVGA Panel"
 	select FB_MSM_MDDI

@@ -31,6 +31,7 @@
 #define MSM_FB_PANEL_H
 
 #include "msm_fb_def.h"
+#include <mach/board.h>
 #include <linux/msm_fb_panel.h>
 
 /* panel id type */
