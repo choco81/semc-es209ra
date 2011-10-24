@@ -53,8 +53,9 @@
 #include <mach/msm_tsif.h>
 #include <mach/msm_battery.h>
 #include <mach/rpc_server_handset.h>
-#ifdef CONFIG_MAX17040_FUELGAUGE
+#ifdef CONFIG_BATTERY_X10_ZEUS
 #include <linux/max17040.h>
+#include <mach/semc_battery_data.h>
 #endif
 #ifdef CONFIG_SENSORS_AKM8973
 #include <linux/akm8973.h>
@@ -1372,8 +1373,25 @@ static struct msm_acpu_clock_platform_data qsd8x50_clock_data = {
 	.acpu_set_vdd = qsd8x50_tps65023_set_dcdc1,
 };
 
+/* Driver(s) to be notified upon change in bdata */
+static char *bdata_supplied_to[] = {
+	MAX17040_NAME,
+};
 
-#ifdef CONFIG_MAX17040_FUELGAUGE
+#ifdef CONFIG_BATTERY_X10_ZEUS
+static struct semc_battery_platform_data semc_battery_platform_data = {
+	.supplied_to = bdata_supplied_to,
+	.num_supplicants = ARRAY_SIZE(bdata_supplied_to),
+};
+
+static struct platform_device bdata_driver = {
+	.name = SEMC_BDATA_NAME,
+	.id = -1,
+	.dev = {
+		.platform_data = &semc_battery_platform_data,
+	},
+};
+
 static struct max17040_platform_data max17040_platform_data = {
 	.model_desc = {
 		.ocv_test = { 0xD9, 0x80 },
@@ -1436,7 +1454,7 @@ static struct i2c_board_info msm_i2c_board_info[] __initdata = {
 	{
 		I2C_BOARD_INFO("tps65023", 0x48),
 	},
-#ifdef CONFIG_MAX17040_FUELGAUGE
+#ifdef CONFIG_BATTERY_X10_ZEUS
 	{
 		I2C_BOARD_INFO(MAX17040_NAME, 0x6C >> 1),
 		.platform_data = &max17040_platform_data,
@@ -1703,6 +1721,7 @@ static struct platform_device msm_wlan_ar6000_pm_device = {
         .resource       = NULL,
 };
 
+/*
 static u32 msm_calculate_batt_capacity(u32 current_voltage);
 
 static struct msm_psy_batt_pdata msm_psy_batt_data = {
@@ -1727,6 +1746,7 @@ static struct platform_device msm_batt_device = {
 	.id		    = -1,
 	.dev.platform_data  = &msm_psy_batt_data,
 };
+*/
 
 #ifdef CONFIG_SEMC_LOW_BATT_SHUTDOWN
 static struct lbs_platform_data lbs_data = {
@@ -1770,6 +1790,11 @@ static int msm_hsusb_pmic_notif_init(void (*callback)(int online), int init)
 }
 static int msm_hsusb_ldo_init(int init);
 static int msm_hsusb_ldo_enable(int enable);
+
+/* Driver(s) to be notified upon change in USB */
+static char *hsusb_chg_supplied_to[] = {
+	MAX17040_NAME,
+};
 
 static struct msm_otg_platform_data msm_otg_pdata = {
 	.rpc_connect	= hsusb_rpc_connect,
@@ -1853,7 +1878,8 @@ static struct platform_device *devices[] __initdata = {
 #ifdef CONFIG_PMIC_TIME
 	&pmic_time_device,
 #endif
-	&msm_batt_device,
+	&bdata_driver,
+	//&msm_batt_device,
 };
 
 static void __init es209ra_init_irq(void)
@@ -2414,6 +2440,8 @@ static void __init es209ra_init(void)
 	config_camera_off_gpios(); /* might not be necessary */
 #endif
 	qsd8x50_init_usb();
+	hsusb_chg_set_supplicants(hsusb_chg_supplied_to,
+				  ARRAY_SIZE(hsusb_chg_supplied_to));
 	qsd8x50_init_mmc();
 	bt_power_init();
 	audio_gpio_init();
